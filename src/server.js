@@ -3,6 +3,7 @@ const net = require("net");
 const bitcoin = require("bitcoinjs-lib");
 const BigNumber = require("bignumber.js");
 const request = require("request");
+const { rpcConfig, rpcFilters, rpcResponses, rpcHeaders } = require("./btc-rpc");
 
 //var electrsHost = 'electrs';
 const btcCookiePass = process.env.BTC_RPC_COOKIE_PASS;
@@ -81,11 +82,9 @@ const eRpc = (rpcCall, addr) => {
 };
 
 // btc rpc
-const bRpc = (rpcCall) => {
+const bRpc = (rpcCall, reqOptions = {}) => {
   return new Promise((resolve, reject) => {
-    const headers = {
-      "content-type": "text/plain;",
-    };
+    const headers = reqOptions.headers || rpcHeaders.contentType.PLAIN_TEXT;
     const options = {
       url: `http://__cookie__:${btcCookiePass}@${btcRpcUrl}`,
       method: "POST",
@@ -109,6 +108,14 @@ const bRpc = (rpcCall) => {
         }
       }
     };
+    // Reject unallowed methods. Consider switching to whitelist for allowed methods
+    if (
+      reqOptions.useWalletFilter &&
+      rpcFilters.isWalletMethod(rpcCall.method.toLowerCase())
+    ) {
+      return reject(rpcResponses.RPC_NOT_ALLOWED);
+    }
+
     try {
       request(options, callback);
     } catch (e) {
@@ -584,6 +591,19 @@ app.get("/getblocktxs/:blockhash", (req, res) => {
       });
     })
     .catch((err) => {
+      res.status(err.code).end();
+    });
+});
+
+// TODO: Separate into its own file
+app.post("/btc-rpc", (req, res) => {
+  const reqOptions = {
+    useWalletFilter: rpcConfig.flags.USE_WALLET_METHOD_FILTER,
+    headers: rpcHeaders.contentType.JSON,
+  };
+  bRpc(req.body, reqOptions)
+    .then(json => res.send(json))
+    .catch(err => {
       res.status(err.code).end();
     });
 });

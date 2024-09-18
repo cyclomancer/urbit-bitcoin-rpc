@@ -1,84 +1,33 @@
-const walletMethods = [
-  "abandontransaction",
-  "abortrescan",
-  "addmultisigaddress",
-  "backupwallet",
-  "bumpfee",
-  "createwallet",
-  "dumpprivkey",
-  "dumpwallet",
-  "encryptwallet",
-  "getaddressesbylabel",
-  "getaddressinfo",
-  "getbalance",
-  "getbalances",
-  "getnewaddress",
-  "getrawchangeaddress",
-  "getreceivedbyaddress",
-  "getreceivedbylabel",
-  "gettransaction",
-  "getunconfirmedbalance",
-  "getwalletinfo",
-  "importaddress",
-  "importdescriptors",
-  "importmulti",
-  "importprivkey",
-  "importprunedfunds",
-  "importpubkey",
-  "importwallet",
-  "keypoolrefill",
-  "listaddressgroupings",
-  "listlabels",
-  "listlockunspent",
-  "listreceivedbyaddress",
-  "listreceivedbylabel",
-  "listsinceblock",
-  "listtransactions",
-  "listunspent",
-  "listwalletdir",
-  "listwallets",
-  "loadwallet",
-  "lockunspent",
-  "psbtbumpfee",
-  "removeprunedfunds",
-  "rescanblockchain",
-  "send",
-  "sendmany",
-  "sendtoaddress",
-  "sethdseed",
-  "setlabel",
-  "settxfee",
-  "setwalletflag",
-  "signmessage",
-  "signrawtransactionwithwallet",
-  "unloadwallet",
-  "upgradewallet",
-  "walletcreatefundedpsbt",
-  "walletlock",
-  "walletpassphrase",
-  "walletpassphrasechange",
-  "walletprocesspsbt",
-];
+const { contentTypeHeaders, errors, rpcMethods } = require("./rpcConstants");
 
-const isWalletMethod = method => walletMethods.includes(method);
+const isWalletMethod = method => rpcMethods.wallet.includes(method);
 
-const RPC_NOT_ALLOWED = { code: 405, msg: "bad btc-rpc call" };
+const getContentType = req => {
+  return req?.headers["content-type"] || contentTypeHeaders.JSON;
+};
 
-const contentTypeHeaders = {
-  JSON: { "content-type": "application/json" },
-  PLAIN_TEXT: { "content-type": "text/plain" },
+const containsValidRpcCall = req => {
+  return req.body && req.body.method && req.body.jsonrpc;
+  // && req.body.id;
 };
 
 const rpc = {
-  filters: {
-    isWalletMethod,
+  headers: { contentType: contentTypeHeaders },
+  filters: { isWalletMethod },
+  RESPONSES: { ...errors },
+  handlers: {
+    connectionError(error) {
+      const { syscall, address, port, code } = error;
+      return {
+        ...errors.CONNECTION_ERROR,
+        _code: code,
+        syscall,
+        address,
+        port,
+      };
+    },
   },
-  RESPONSES: {
-    RPC_NOT_ALLOWED,
-  },
-  headers: {
-    contentType: contentTypeHeaders,
-  },
+  utils: { getContentType, containsValidRpcCall },
   flags: {
     USE_WALLET_METHOD_FILTER: true,
   },
@@ -89,4 +38,6 @@ module.exports = {
   rpcFilters: rpc.filters,
   rpcResponses: rpc.RESPONSES,
   rpcHeaders: rpc.headers,
+  rpcHandlers: rpc.handlers,
+  rpcUtils: rpc.utils,
 };

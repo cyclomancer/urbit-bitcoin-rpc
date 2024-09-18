@@ -14,7 +14,7 @@ const btcRpcPort = process.env.BTC_RPC_PORT;
 const btcRpcUrl = `127.0.0.1:${btcRpcPort}/`;
 const electrsHost = process.env.ELECTRS_HOST;
 const electrsPort = process.env.ELECTRS_PORT;
-const PORT = parseInt(process.env.PROXY_PORT);
+const PORT = parseInt(process.env.PROXY_PORT) || 3000;
 
 const app = express();
 app.use(express.json());

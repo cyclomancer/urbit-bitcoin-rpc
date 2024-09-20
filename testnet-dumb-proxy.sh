@@ -4,7 +4,7 @@
 # DRIVE=/home/armitage/spiralext
 # DRIVE=/Volumes/sandisk
 # DEFAULT_LOCATION_MAC=~/Library/Application\ Support/Bitcoin
-DRIVE=~/Library/Application\ Support/Bitcoin
+DRIVE=~/Library/ApplicationSupport/Bitcoin
 BTC_DATADIR=$DRIVE/BTC
 bitcoind -datadir=$BTC_DATADIR -testnet &
 sleep 2

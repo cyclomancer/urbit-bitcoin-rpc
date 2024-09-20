@@ -5,7 +5,7 @@
 ##########################
 # DRIVE=/home/armitage/spiralext
 # DEFAULT_LOCATION_MAC=~/Library/Application\ Support/Bitcoin
-DRIVE=~/Library/Application\ Support/Bitcoin
+DRIVE=~/Library/ApplicationSupport/Bitcoin
 
 # Start BTC first so that proxy can access BTC's .cookie file
 # Sleep so that the .cookie file is generated
@@ -19,7 +19,7 @@ export BTC_RPC_PORT=18332
 export BTC_NETWORK=REGTEST
 export ELECTRS_HOST=127.0.0.1
 export ELECTRS_PORT=60401
-export PROXY_PORT=50002
+export PROXY_PORT=50003
 
 node src/server.js &
 

@@ -3,6 +3,7 @@ const net = require("net");
 const bitcoin = require("bitcoinjs-lib");
 const BigNumber = require("bignumber.js");
 const request = require("request");
+const bodyParser = require("body-parser");
 const {
   rpcConfig,
   rpcFilters,
@@ -22,7 +23,7 @@ console.log(`INFO PROXY: btc rpc url: ${btcRpcUrl}`)
 console.log(`INFO PROXY: Electrs host: ${electrsHost}:${electrsPort}`);
 
 const app = express();
-const port = 50002;
+const port = 50003;
 app.use(express.json());
 
 const identity = (x) => x;
@@ -634,5 +635,18 @@ const handleRpc = (req, res) => {
 app.get("/btc-rpc", handleRpc);
 
 app.post("/btc-rpc", handleRpc);
+
+app.post('/electrs-rpc', (req, res) => {
+  console.log(req.body);
+  eRpc(req.body)
+      .then(json => {
+          res.send(json);
+      })
+      .catch(err => {
+          console.log("ERROR");
+          console.log(err);
+          res.status(502).end();
+      });
+});
 
 app.listen(port, () => console.log(`Electrs proxy listening on port ${port}`));

@@ -5,7 +5,7 @@
 ##########################
 # DRIVE=/home/armitage/spiralext
 # DEFAULT_LOCATION_MAC=~/Library/Application\ Support/Bitcoin
-DRIVE=~/Library/Application\ Support/Bitcoin
+DRIVE=~/Library/ApplicationSupport/Bitcoin
 
 # Start BTC first so that proxy can access BTC's .cookie file
 # Sleep so that the .cookie file is generated

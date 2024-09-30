@@ -3,7 +3,6 @@ const net = require("net");
 const bitcoin = require("bitcoinjs-lib");
 const BigNumber = require("bignumber.js");
 const request = require("request");
-const bodyParser = require("body-parser");
 const {
   rpcConfig,
   rpcFilters,
@@ -615,8 +614,7 @@ app.get("/getblocktxs/:blockhash", (req, res) => {
     });
 });
 
-// const { containsValidRpcCall, getContentType } = rpcUtils; 
-
+// TODO: improve; add better error handling, tests
 const handleRpc = (req, res) => {
   const reqOptions = {
     useWalletFilter: rpcConfig.flags.USE_WALLET_METHOD_FILTER,
@@ -627,7 +625,6 @@ const handleRpc = (req, res) => {
   if (rpcUtils.containsValidRpcCall(req)) {
     jsonRespond(bRpc(req.body, reqOptions), identity, res);
   } else {
-    // TODO: Add error message
     res.status(400).end();
   }
 };

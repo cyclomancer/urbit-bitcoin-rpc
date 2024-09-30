@@ -1,7 +1,6 @@
 #!/bin/bash
 # Start BTC first so that proxy can access BTC's .cookie file
 # Sleep so that the .cookie file is generated
-# DEFAULT_LOCATION_MAC=~/Library/Application\ Support/Bitcoin
 DRIVE=/Volumes/sandisk
 BTC_DATADIR=$DRIVE/BTC
 bitcoind -datadir=$BTC_DATADIR &

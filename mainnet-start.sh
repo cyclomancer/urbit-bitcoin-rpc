@@ -3,10 +3,7 @@
 #  Variables:
 #  DRIVE: location of the (probably external) drive holding a /BTC directory
 ##########################
-# DRIVE=/home/armitage/spiralext
-# DRIVE=/Volumes/sandisk
-# DEFAULT_LOCATION_MAC=~/Library/Application\ Support/Bitcoin
-DRIVE=~/Library/Application\ Support/Bitcoin
+DRIVE=/Volumes/sandisk
 
 # Start BTC first so that proxy can access BTC's .cookie file
 # Sleep so that the .cookie file is generated

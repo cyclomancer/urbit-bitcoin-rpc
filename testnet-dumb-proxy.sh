@@ -1,7 +1,7 @@
 #!/bin/bash
 # Start BTC first so that proxy can access BTC's .cookie file
 # Sleep so that the .cookie file is generated
-DRIVE=/home/armitage/spiralext
+DRIVE=/Volumes/sandisk
 BTC_DATADIR=$DRIVE/BTC
 bitcoind -datadir=$BTC_DATADIR -testnet &
 sleep 2

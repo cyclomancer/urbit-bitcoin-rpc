@@ -4,14 +4,16 @@
   "description": "*TODO* Make test vectors for these addresses: curl http://localhost:50002/addresses/info/bc1qm7cegwfd0pvv9ypvz5nhstage00xkxevtrpshc curl http://localhost:50002/addresses/info/bc1qlwd7mw33uea5m8r2lsnsrkc7gp2qynrxsfxpfm curl http://localhost:50002/addresses/info/bc1qglkc9zfcn04vcc88nn0ljtxcpu5uxfznc3829k ::  first is an address w balance ::  second has no balance but is used ::  third is unused",
   "main": "index.js",
   "dependencies": {
-    "bignumber.js": "^9.0.1"
-  },
-  "devDependencies": {
+    "bignumber.js": "^9.0.1",
     "bitcoinjs-lib": "^5.2.0",
-    "express": "^4.17.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
     "request": "^2.88.2"
   },
   "scripts": {
+    "regtest-start": "sh regtest-start.sh",
+    "node-server": "node src/server.js",
+    "node-dumb": "node src/dumb.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,5 +25,6 @@
   "bugs": {
     "url": "https://github.com/timlucmiptev/urbit-bitcoin-rpc/issues"
   },
-  "homepage": "https://github.com/timlucmiptev/urbit-bitcoin-rpc#readme"
+  "homepage": "https://github.com/timlucmiptev/urbit-bitcoin-rpc#readme",
+  "packageManager": "npm@10.8.3+sha512.d08425c8062f56d43bb8e84315864218af2492eb769e1f1ca40740f44e85bd148969382d651660363942e5909cb7ffcbef7ca0ae963ddc2c57a51243b4da8f56"
 }

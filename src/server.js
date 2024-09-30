@@ -3,6 +3,13 @@ const net = require("net");
 const bitcoin = require("bitcoinjs-lib");
 const BigNumber = require("bignumber.js");
 const request = require("request");
+const {
+  rpcConfig,
+  rpcFilters,
+  rpcResponses,
+  rpcHeaders,
+  rpcUtils,
+} = require("./btc-rpc");
 
 //var electrsHost = 'electrs';
 const btcCookiePass = process.env.BTC_RPC_COOKIE_PASS;
@@ -11,10 +18,11 @@ const btcRpcUrl = `127.0.0.1:${btcRpcPort}/`;
 const electrsHost = process.env.ELECTRS_HOST;
 const electrsPort = process.env.ELECTRS_PORT;
 // console.log(`INFO PROXY: btc rpc pass: ${btcCookiePass}`)
+console.log(`INFO PROXY: btc rpc url: ${btcRpcUrl}`)
 console.log(`INFO PROXY: Electrs host: ${electrsHost}:${electrsPort}`);
 
 const app = express();
-const port = 50002;
+const port = 50003;
 app.use(express.json());
 
 const identity = (x) => x;
@@ -80,12 +88,11 @@ const eRpc = (rpcCall, addr) => {
   });
 };
 
+// TODO: Rewrite from scratch; get tests from dependendents
 // btc rpc
-const bRpc = (rpcCall) => {
+const bRpc = (rpcCall, reqOptions = {}) => {
   return new Promise((resolve, reject) => {
-    const headers = {
-      "content-type": "text/plain;",
-    };
+    const headers = reqOptions.headers || rpcHeaders.contentType.PLAIN_TEXT;
     const options = {
       url: `http://__cookie__:${btcCookiePass}@${btcRpcUrl}`,
       method: "POST",
@@ -98,19 +105,38 @@ const bRpc = (rpcCall) => {
       } else {
         let err;
         try {
-          err = JSON.parse(body).error;
+          if (typeof body !== "undefined") {
+            err = JSON.parse(body).error;
+          }
         } catch (e) {
+          console.error({ e, error, body });
           return reject({ code: 400, msg: "bad btc-rpc call" });
         }
         if (err != undefined) {
           return resolve(JSON.parse(body));
         } else {
+          console.error({error, err, response, body});
+          if (error.code === "ECONNREFUSED") {
+            return reject(rpcConfig.handlers.connectionError(error));
+          }
+          if (error.code === 405) {
+            return reject(rpcResponses.METHOD_NOT_SUPPORTED);
+          }
           return reject({ code: 400, msg: "bad btc-rpc call" });
         }
       }
     };
+
     try {
-      request(options, callback);
+      // console.log({ options })
+      // Reject forbidden methods. Consider switching to whitelist for allowed methods
+      if (
+        reqOptions.useWalletFilter &&
+        rpcFilters.isWalletMethod(rpcCall?.method?.toLowerCase())
+      ) {
+        return reject(rpcResponses.METHOD_NOT_SUPPORTED);
+      }
+      return request(options, callback);
     } catch (e) {
       return reject({ code: 502 });
     }
@@ -586,6 +612,38 @@ app.get("/getblocktxs/:blockhash", (req, res) => {
     .catch((err) => {
       res.status(err.code).end();
     });
+});
+
+// TODO: improve; add better error handling, tests
+const handleRpc = (req, res) => {
+  const reqOptions = {
+    useWalletFilter: rpcConfig.flags.USE_WALLET_METHOD_FILTER,
+    headers: {
+      "content-type": rpcUtils.getContentType(req),
+    },
+  };
+  if (rpcUtils.containsValidRpcCall(req)) {
+    jsonRespond(bRpc(req.body, reqOptions), identity, res);
+  } else {
+    res.status(400).end();
+  }
+};
+
+app.get("/btc-rpc", handleRpc);
+
+app.post("/btc-rpc", handleRpc);
+
+app.post('/electrs-rpc', (req, res) => {
+  console.log(req.body);
+  eRpc(req.body)
+      .then(json => {
+          res.send(json);
+      })
+      .catch(err => {
+          console.log("ERROR");
+          console.log(err);
+          res.status(502).end();
+      });
 });
 
 app.listen(port, () => console.log(`Electrs proxy listening on port ${port}`));
